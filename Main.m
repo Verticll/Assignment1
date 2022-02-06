@@ -29,6 +29,7 @@ global C
     
     %CONSTANTS
     m_Si = 4.6637066e-23;
+    m_elec = 0.26 * C.m_0;
     Vth = sqrt(C.kb * 300/ m_Si);
     %RANDOM VALUES
     Rx = 2 * (rand(1, nElec)-0.5);
@@ -77,6 +78,7 @@ global C
                   Vy(i) = Vy(i) * -1; 
                end
             end
+            %translation on the Xmax
             for i=1:1:nElec
                if x(i) <= -xMax
                   x(i) = x(i) + 2 * xMax;
