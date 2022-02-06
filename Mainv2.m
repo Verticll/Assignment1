@@ -14,7 +14,7 @@
 % show temperature on plot
 % use arrays for position and velocity
 
-function [] = Main(nElec)
+function [] = Mainv2(nElec)
 global C
 
     C.q_0 = 1.60217653e-19;             % electron charge
@@ -29,7 +29,6 @@ global C
     
     %CONSTANTS
     m_Si = 4.6637066e-23;
-    m_elec = 0.26 * C.m_0;
     Vth = sqrt(C.kb * 300/ m_Si);
     %RANDOM VALUES
     Rx = 2 * (rand(1, nElec)-0.5);
@@ -46,8 +45,7 @@ global C
     yMax = 100e-9;
     Limits = [-xMax +xMax -yMax +yMax];
     LimitsTime = [0 TStop 0 12];
-    %FLAGS
-    xFlag = 0;
+
     
     % randomly place  abunch of particles 1000-10000
     x(1, :) = Rx * xMax;
@@ -65,6 +63,9 @@ global C
             yOld = y;
             x = x + (Vx .* dt);
             y = y + (Vy .* dt);
+            xPlot = [xOld(:) x(:)];
+            yPlot = [yOld(:) y(:)];
+            
             %Iterate time
             t  = t + dt;  
             
@@ -78,13 +79,13 @@ global C
                   Vy(i) = Vy(i) * -1; 
                end
             end
-            %translation on the Xmax
             for i=1:1:nElec
                if x(i) <= -xMax
                   x(i) = x(i) + 2 * xMax;
-                  
+                  xOld(i) = xOld(i) + 2 * xMax;
                else if x(i) >= xMax
-                  x(i) = x(i) + 2 * -xMax;      
+                  x(i) = x(i) + 2 * -xMax;
+                  xOld(i) = xOld(i) + 2 * xMax;
                    end
                end
             end
@@ -94,10 +95,15 @@ global C
             VavgPlot(count,:) = [Vavg]; % store array of times and average velocities
             timePlot(count,:) = [t];
             
-            subplot(2,1,1),plot(xCaptured, yCaptured);
+            subplot(2,1,1);
             hold on
             %subplot(2,1,1),plot(x, y, 'bo', 'markers',4,'MarkerFaceColor', 'b');
-            subplot(2,1,1),plot(xCaptured, yCaptured);
+            subplot(2,1,1),plot(xPlot(1,1:2), yPlot(1,1:2),'b', ...
+            xPlot(2,1:2), yPlot(2,1:2),'r',...
+            xPlot(2,1:2), yPlot(3,1:2),'g',...
+            xPlot(2,1:2), yPlot(4,1:2),'c',...
+            xPlot(2,1:2), yPlot(5,1:2),'y',...
+            xPlot(2,1:2), yPlot(6,1:2),'m');
             %quiver(x,y,Vx,Vy);
             hold off
             axis(Limits);

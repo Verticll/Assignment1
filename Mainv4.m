@@ -1,4 +1,4 @@
-function [] = MainPart2Normal(nElec)
+function [] = Mainv4(nElec)
 global C
 
     C.q_0 = 1.60217653e-19;             % electron charge
@@ -35,7 +35,7 @@ global C
     pScat = 1 - C.e^(-(dt/(0.2e-12)));
     scattercount = 0;
     %Drawing of box
-    Box = [-10e-9 yMax/2; 10e-9 yMax/2; 10e-9 -yMax; -10e-9 -yMax;-10e-9 yMax/2;];
+    Box = [-40e-9 yMax/2; 40e-9 yMax/2; 40e-9 -yMax; -40e-9 -yMax;-40e-9 yMax/2;];
 
     
     % randomly place  abunch of particles 1000-10000
@@ -98,11 +98,11 @@ global C
             %Checking box boundaries
             for i=1:1:nElec
                 for j=1:1:nElec
-                    if y(i) <= yMax/2 && -10e-9 <= x(j) && x(j) <= 10e-9
+                    if y(i) <= yMax/2 && -40e-9 <= x(j) && x(j) <= 40e-9
                         if y(i) <= yMax/2
                             Vy(i) = Vy(i) * -1;
                         end
-                        if -10e-9 <= x(j) && x(j) <= 10e-9
+                        if -40e-9 <= x(j) && x(j) <= 40e-9
                             Vx(j) = Vx(j) * -1;
                         end
                     end

@@ -1,4 +1,20 @@
-function [] = MainPart2(nElec)
+% Question 1 Thermal Velocity at T=300K?
+% Vth = sqrt(C.kb * 300K / C.m_0)
+
+% Question 2 mean free path?
+
+% Write a program as follows
+% at interval of dt update locations using newtons laws of motion. 
+% time step should be 1/100th of the region size
+% simulate for 1000 steps
+% trace some of the trajectories with plot
+% show 2d plot of all or some particles
+% for the y boundarie reflect particles 
+% for the x boundarie jump to opposite side
+% show temperature on plot
+% use arrays for position and velocity
+
+function [] = Mainv1(nElec)
 global C
 
     C.q_0 = 1.60217653e-19;             % electron charge
@@ -10,18 +26,15 @@ global C
     C.mu_0 = 1.2566370614e-6;           % vacuum permeability
     C.c = 299792458;                    % speed of light
     C.g = 9.80665;                      %metres (32.1740 ft) per s²
-    C.e = 2.7182818;                    %wulers number
     
     %CONSTANTS
     m_Si = 4.6637066e-23;
+    m_elec = 0.26 * C.m_0;
     Vth = sqrt(C.kb * 300/ m_Si);
     %RANDOM VALUES
     Rx = 2 * (rand(1, nElec)-0.5);
     Ry = 2 * (rand(1, nElec)-0.5);
     Rtheta = 360 * rand(1, nElec);
-    SOMETHING = randn(1,nElec);
-    RV = Vth/3 * (randn(1,nElec) + 3);
-   
     %TIME
     t = 0;
     dt = 100e-11;
@@ -33,35 +46,31 @@ global C
     yMax = 100e-9;
     Limits = [-xMax +xMax -yMax +yMax];
     LimitsTime = [0 TStop 0 12];
-    %Scattering probability
-    pScat = 1 - C.e^(-dt/(0.2e-12));
-
+    %FLAGS
+    xFlag = 0;
     
     % randomly place  abunch of particles 1000-10000
     x(1, :) = Rx * xMax;
     y(1, :) = Ry * yMax;
     
     % give each particle Vth but with a random direction
-    Vx(1:nElec) = RV .* cos(Rtheta);
-    Vy(1:nElec) = RV .* sin(Rtheta);
+    Vx(1:nElec) = Vth * cos(Rtheta);
+    Vy(1:nElec) = Vth * sin(Rtheta);
     meanVy = mean(Vy);
     meanVx = mean(Vx);
    
     while t < TStop
-            %Generate normal distribution for scatter tests
-            rScat = randn(1,nElec);
             %Get positions
             xOld = x;
             yOld = y;
             x = x + (Vx .* dt);
             y = y + (Vy .* dt);
-
-            %Get plot arrays using new - old
-            xPlot = [xOld(:) x(:)];
-            yPlot = [yOld(:) y(:)];
-            
             %Iterate time
-            t  = t + dt;              
+            t  = t + dt;  
+            
+            %Get trajectories
+            xCaptured(count,:) = [x(1:5)];
+            yCaptured(count,:) = [y(1:5)];
             
             %Reflect on the Ymax
             for i=1:1:nElec
@@ -69,13 +78,13 @@ global C
                   Vy(i) = Vy(i) * -1; 
                end
             end
+            %translation on the Xmax
             for i=1:1:nElec
                if x(i) <= -xMax
                   x(i) = x(i) + 2 * xMax;
-                  xOld(i) = xOld(i) + 2 * xMax;
+                  
                else if x(i) >= xMax
-                  x(i) = x(i) + 2 * -xMax;
-                  xOld(i) = xOld(i) + 2 * xMax;
+                  x(i) = x(i) + 2 * -xMax;      
                    end
                end
             end
@@ -85,15 +94,10 @@ global C
             VavgPlot(count,:) = [Vavg]; % store array of times and average velocities
             timePlot(count,:) = [t];
             
-            subplot(2,1,1);
+            subplot(2,1,1),plot(xCaptured, yCaptured);
             hold on
             %subplot(2,1,1),plot(x, y, 'bo', 'markers',4,'MarkerFaceColor', 'b');
-            subplot(2,1,1),plot(xPlot(1,1:2), yPlot(1,1:2),'b', ...
-            xPlot(2,1:2), yPlot(2,1:2),'r',...
-            xPlot(3,1:2), yPlot(3,1:2),'g',...
-            xPlot(4,1:2), yPlot(4,1:2),'c',...
-            xPlot(5,1:2), yPlot(5,1:2),'y',...
-            xPlot(6,1:2), yPlot(6,1:2),'m');
+            subplot(2,1,1),plot(xCaptured, yCaptured);
             %quiver(x,y,Vx,Vy);
             hold off
             axis(Limits);

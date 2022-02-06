@@ -1,4 +1,4 @@
-function [] = MainPart2Normal(nElec)
+function [] = Mainv5(nElec)
 global C
 
     C.q_0 = 1.60217653e-19;             % electron charge
@@ -35,7 +35,7 @@ global C
     pScat = 1 - C.e^(-(dt/(0.2e-12)));
     scattercount = 0;
     %Drawing of box
-    Box = [0 TStop; 0 300];
+    Box = [-40e-9 yMax/2; 40e-9 yMax/2; 40e-9 -yMax; -40e-9 -yMax;-40e-9 yMax/2;];
 
     
     % randomly place  abunch of particles 1000-10000
@@ -95,15 +95,15 @@ global C
                end
             end
 
-            %Making a box
+            %Checking box boundaries
             for i=1:1:nElec
                 for j=1:1:nElec
-                    if x(i) <= xMax/2 && -10e-9 <= y(j) && y(j) <= 10e-9
-                        if x(i) <= xMax/2
-                            Vx(i) = Vx(i) * -1;
+                    if y(i) <= yMax/2 && -40e-9 <= x(j) && x(j) <= 40e-9
+                        if y(i) <= yMax/2
+                            Vy(i) = Vy(i) * -1;
                         end
-                        if -10e-9 <= y(j) && y(j) <= 10e-9
-                            Vy(j) = Vy(j) * -1;
+                        if -40e-9 <= x(j) && x(j) <= 40e-9
+                            Vx(j) = Vx(j) * -1;
                         end
                     end
                 end
@@ -120,6 +120,7 @@ global C
             subplot(2,2,1);
             hold on
             %subplot(2,1,1),plot(x, y, 'bo', 'markers',4,'MarkerFaceColor', 'b');
+            subplot(2,2,1),plot(Box(1:5,1),Box(1:5,2),'k');
             subplot(2,2,1),plot(xPlot(1,1:2), yPlot(1,1:2),'b', ...
             xPlot(2,1:2), yPlot(2,1:2),'r',...
             xPlot(3,1:2), yPlot(3,1:2),'g',...
