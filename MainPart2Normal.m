@@ -13,8 +13,7 @@ global C
     C.e = 2.7182818;                    %wulers number
     
     %CONSTANTS
-    m_Si = 4.6637066e-23;
-    Vth = sqrt(C.kb * 300/ m_Si);
+    Vth = sqrt(C.kb * 300/ (0.26*C.m_0));
     %RANDOM VALUES
     Rx = 2 * (rand(1, nElec)-0.5);
     Ry = 2 * (rand(1, nElec)-0.5);
@@ -23,17 +22,17 @@ global C
    
     %TIME
     t = 0;
-    dt = 100e-11;
-    TStop = 100e-8;
+    dt = 1e-13;
+    TStop = 1000*dt;
     %COUNT
     count = 1;
     %BOUNDARIES
     xMax = 200e-9;
     yMax = 100e-9;
     Limits = [-xMax +xMax -yMax +yMax];
-    LimitsTime = [0 TStop 0 12];
+    LimitsTime = [0 TStop 0 Vth+0.1*Vth];
     %Scattering probability
-    pScat = 1 - C.e^(-dt/(0.2e-12));
+    pScat = 1 - C.e^(-(dt/(0.2e-12)));
 
     
     % randomly place  abunch of particles 1000-10000
@@ -48,7 +47,15 @@ global C
    
     while t < TStop
             %Generate normal distribution for scatter tests
-            rScat = randn(1,nElec);
+            rScat = rand(1,nElec);
+            for i=1:1:nElec
+               if rScat(i) <= pScat
+                  RV1 = Vth * abs(randn(1, 1));
+                  Rtheta1 = 360 * rand(1, 1);
+                  Vx(i) = RV1 * cos(Rtheta1);
+                  Vy(i) = RV1 * sin(Rtheta1);
+               end
+            end
             %Get positions
             xOld = x;
             yOld = y;
