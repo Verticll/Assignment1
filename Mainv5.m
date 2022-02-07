@@ -15,9 +15,9 @@ global C
     %CONSTANTS
     Vth = sqrt(C.kb * 300/ (0.26*C.m_0));
     %RANDOM VALUES
-    Rx = 2 * (rand(1, nElec)-0.5);
+    Rx = zeros(1,nElec)-200e-9;
     Ry = 2 * (rand(1, nElec)-0.5);
-    Rtheta = 360 * rand(1, nElec);
+    Rtheta = (180 * rand(1, nElec))-90;
     RV = Vth * abs(randn(1,nElec));
     %TIME
     t = 0;
@@ -25,6 +25,7 @@ global C
     TStop = 1000*dt;
     %COUNT
     count = 1;
+    nElecCount = 0;
     %BOUNDARIES
     xMax = 200e-9;
     yMax = 100e-9;
@@ -36,10 +37,13 @@ global C
     scattercount = 0;
     %Drawing of box
     Box = [-40e-9 yMax/2; 40e-9 yMax/2; 40e-9 -yMax; -40e-9 -yMax;-40e-9 yMax/2;];
+    %instantiate variables
+    xOld = zeros(1,nElec);
+    yOld = zeros(1,nElec);
 
     
     % randomly place  abunch of particles 1000-10000
-    x(1, :) = Rx * xMax;
+    x(1, :) = Rx;
     y(1, :) = Ry * yMax;
     
     % give each particle Vth but with a random direction
@@ -49,12 +53,14 @@ global C
     VTEST1 = mean(RV);
    
     while t < TStop
+            
+
             %Generate normal distribution for scatter tests
-            rScat = rand(1,nElec);
+            rScat = rand(1,nElecCount);
             scattercount = 0;
 
             %Scatter test
-            for i=1:1:nElec
+            for i=1:1:nElecCount
                if rScat(i) <= pScat
                   scattercount = scattercount+1;
                   RV1 = Vth * abs(randn(1, 1));
@@ -66,10 +72,11 @@ global C
 
 
             %Get positions
-            xOld = x;
-            yOld = y;
-            x = x + (Vx .* dt);
-            y = y + (Vy .* dt);
+           
+            xOld(1:nElecCount) = x(1:nElecCount);
+            yOld(1:nElecCount) = y(1:nElecCount);
+            x(1:nElecCount) = x(1:nElecCount) + (Vx(1:nElecCount) .* dt);
+            y(1:nElecCount) = y(1:nElecCount) + (Vy(1:nElecCount) .* dt);
 
             %Get plot arrays using new - old
             xPlot = [xOld(:) x(:)];
@@ -79,25 +86,20 @@ global C
             t  = t + dt;              
             
             %Reflect on the Ymax
-            for i=1:1:nElec
+            for i=1:1:nElecCount
                if y(i) <= -yMax || y(i) >= yMax
                   Vy(i) = Vy(i) * -1; 
                end
             end
-            for i=1:1:nElec
-               if x(i) <= -xMax
-                  x(i) = x(i) + 2 * xMax;
-                  xOld(i) = xOld(i) + 2 * xMax;
-               else if x(i) >= xMax
-                  x(i) = x(i) + 2 * -xMax;
-                  xOld(i) = xOld(i) + 2 * xMax;
-                   end
+            for i=1:1:nElecCount
+                if x(i) <= -xMax || x(i) >= xMax
+                  Vx(i) = Vx(i) * -1; 
                end
             end
 
             %Checking box boundaries
-            for i=1:1:nElec
-                for j=1:1:nElec
+            for i=1:1:nElecCount
+                for j=1:1:nElecCount
                     if y(i) <= yMax/2 && -40e-9 <= x(j) && x(j) <= 40e-9
                         if y(i) <= yMax/2
                             Vy(i) = Vy(i) * -1;
@@ -112,7 +114,7 @@ global C
             %Temperature calc
             VAvg = sqrt(mean(abs(Vx))^2 + mean(abs(Vy))^2); % get current average Velocity
             TAvg = (VAvg.^2 .* (0.26*C.m_0))/C.kb; % get current average Temp in K
-            ScatterAvg = scattercount/nElec; % get current chance to scatter
+            ScatterAvg = scattercount/nElecCount; % get current chance to scatter
             TempPlot(count,:) = TAvg;  % Vth = sqrt(C.kb * 300/ (0.26*C.m_0));
             scatterPlot(count,:) = ScatterAvg; % store array of times
             timePlot(count,:) = [t]; % store array of times
@@ -121,12 +123,28 @@ global C
             hold on
             %subplot(2,1,1),plot(x, y, 'bo', 'markers',4,'MarkerFaceColor', 'b');
             subplot(2,2,1),plot(Box(1:5,1),Box(1:5,2),'k');
-            subplot(2,2,1),plot(xPlot(1,1:2), yPlot(1,1:2),'b', ...
-            xPlot(2,1:2), yPlot(2,1:2),'r',...
-            xPlot(3,1:2), yPlot(3,1:2),'g',...
-            xPlot(4,1:2), yPlot(4,1:2),'c',...
-            xPlot(5,1:2), yPlot(5,1:2),'y',...
-            xPlot(6,1:2), yPlot(6,1:2),'m');
+            if(nElecCount >= 1)
+            subplot(2,2,1),plot(xPlot(1,1:2), yPlot(1,1:2),'b');
+            end
+            if(nElecCount >= 14)
+            subplot(2,2,1),plot(xPlot(11,1:2), yPlot(11,1:2),'r');
+            end
+            if(nElecCount >= 24)
+            subplot(2,2,1),plot(xPlot(21,1:2), yPlot(21,1:2),'g');
+            end
+            if(nElecCount >= 34)
+            subplot(2,2,1),plot(xPlot(31,1:2), yPlot(31,1:2),'c');
+            end
+            if(nElecCount >= 44)
+            subplot(2,2,1),plot(xPlot(41,1:2), yPlot(41,1:2),'y');
+            end
+            if(nElecCount >= 54)
+            subplot(2,2,1),plot(xPlot(41,1:2), yPlot(41,1:2),'m');
+            end
+            
+            
+            
+            
             %quiver(x,y,Vx,Vy);
             hold off
             axis(Limits);
@@ -157,6 +175,9 @@ global C
             count = count + 1;
             pause(0.0001)
             
+            if nElecCount < 1000
+                nElecCount = nElecCount+10;
+            end
     end
 end
 
